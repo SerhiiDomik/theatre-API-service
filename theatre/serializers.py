@@ -1,3 +1,4 @@
+from django.core.exceptions import ValidationError
 from django.db import transaction
 from rest_framework import serializers
 
@@ -79,6 +80,16 @@ class PerformanceSerializer(serializers.ModelSerializer):
 class TicketSerializer(serializers.ModelSerializer):
     performance = serializers.PrimaryKeyRelatedField(queryset=Performance.objects.all())
 
+    def validate(self, attrs):
+        data = super(TicketSerializer, self).validate(attrs=attrs)
+        Ticket.validate_ticket(
+            attrs["row"],
+            attrs["seat"],
+            attrs["performance"].theatre_hall,
+            ValidationError
+        )
+        return data
+
     class Meta:
         model = Ticket
         fields = ("id", "row", "seat", "performance")
@@ -124,8 +135,8 @@ class PerformanceDetailSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "play",
-            "theatre_hall",
             "show_time",
+            "theatre_hall",
             "taken_places"
         )
 
