@@ -34,6 +34,11 @@ from theatre.serializers import (
 )
 
 
+class DefaultPagination(PageNumberPagination):
+    page_size = 3
+    max_page_size = 20
+
+
 class GenreViewSet(
     mixins.CreateModelMixin,
     mixins.ListModelMixin,
@@ -42,6 +47,7 @@ class GenreViewSet(
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = DefaultPagination
 
 
 class ActorViewSet(
@@ -52,6 +58,7 @@ class ActorViewSet(
     queryset = Actor.objects.all()
     serializer_class = ActorSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = DefaultPagination
 
 
 class TheatreHallViewSet(
@@ -62,6 +69,7 @@ class TheatreHallViewSet(
     queryset = TheatreHall.objects.all()
     serializer_class = TheatreHallSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = DefaultPagination
 
 
 class PlayViewSet(
@@ -73,6 +81,7 @@ class PlayViewSet(
     queryset = Play.objects.prefetch_related("genres", "actors")
     serializer_class = PlaySerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = DefaultPagination
 
     @staticmethod
     def _params_to_ints(qs):
@@ -125,6 +134,7 @@ class PlayViewSet(
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = (
         Performance.objects.all()
@@ -138,6 +148,7 @@ class PerformanceViewSet(viewsets.ModelViewSet):
     )
     serializer_class = PerformanceSerializer
     permission_classes = (IsAdminOrIfAuthenticatedReadOnly,)
+    pagination_class = DefaultPagination
 
     def get_queryset(self):
         date = self.request.query_params.get("date")
@@ -164,11 +175,6 @@ class PerformanceViewSet(viewsets.ModelViewSet):
         return PerformanceSerializer
 
 
-class ReservationPagination(PageNumberPagination):
-    page_size = 3
-    max_page_size = 20
-
-
 class ReservationViewSet(
     mixins.ListModelMixin,
     mixins.CreateModelMixin,
@@ -178,7 +184,7 @@ class ReservationViewSet(
         "tickets__performance__play", "tickets__performance__theatre_hall"
     )
     serializer_class = ReservationSerializer
-    pagination_class = ReservationPagination
+    pagination_class = DefaultPagination
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
