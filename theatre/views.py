@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from django.db.models import F, Count
-from rest_framework import viewsets, mixins
+from rest_framework import viewsets, mixins, status
+from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser
 
 from theatre.models import (
     Genre,
@@ -28,6 +30,7 @@ from theatre.serializers import (
     PerformanceDetailSerializer,
     ReservationSerializer,
     ReservationListSerializer,
+    PlayImageSerializer,
 )
 
 
@@ -102,8 +105,25 @@ class PlayViewSet(
         if self.action == "retrieve":
             return PlayDetailSerializer
 
+        if self.action == "upload_image":
+            return PlayImageSerializer
+
         return PlaySerializer
 
+    @action(
+        methods=["POST"],
+        detail=True,
+        permission_classes=[IsAdminUser],
+        url_path="upload-image",
+    )
+    def upload_image(self, request, pk=None):
+        play = self.get_object()
+        serializer = self.get_serializer(play, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PerformanceViewSet(viewsets.ModelViewSet):
     queryset = (
@@ -145,8 +165,8 @@ class PerformanceViewSet(viewsets.ModelViewSet):
 
 
 class ReservationPagination(PageNumberPagination):
-    page_size = 10
-    max_page_size = 100
+    page_size = 3
+    max_page_size = 20
 
 
 class ReservationViewSet(

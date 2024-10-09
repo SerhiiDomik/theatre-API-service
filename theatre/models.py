@@ -1,6 +1,10 @@
+import os
+import uuid
+
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.conf import settings
+from django.utils.text import slugify
 
 
 class TheatreHall(models.Model):
@@ -35,12 +39,18 @@ class Actor(models.Model):
         return self.first_name + " " + self.last_name
 
 
+def play_image_path(play: "Play", filename: str) -> str:
+    ext = filename.split(".")[-1]
+    filename = f"{slugify(play.title)}-{uuid.uuid4()}.{ext}"
+    return os.path.join("uploads/plays/", filename)
+
+
 class Play(models.Model):
     title = models.CharField(max_length=100, unique=True)
     description = models.TextField()
     actors = models.ManyToManyField(Actor, blank=True)
     genres = models.ManyToManyField(Genre, blank=True)
-    # image??
+    image = models.ImageField(null=True, upload_to=play_image_path)
 
     class Meta:
         ordering = ["title"]
