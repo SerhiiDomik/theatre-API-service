@@ -151,10 +151,9 @@ class ReservationViewSet(
         "tickets__performance__play", "tickets__performance__theatre_hall"
     )
     serializer_class = ReservationSerializer
-    # pagination_class = ReservationPagination
 
     def get_queryset(self):
-        return Reservation.objects.filter()
+        return Reservation.objects.all()
         # return Reservation.objects.filter(user=self.request.user)
 
     def get_serializer_class(self):
@@ -165,4 +164,5 @@ class ReservationViewSet(
 
     def perform_create(self, serializer):
         serializer.save()
-        # serializer.save(user=self.request.user)
+        serializer.save(user=self.request.user)
+
