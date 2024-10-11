@@ -16,18 +16,14 @@ class UnauthenticatedTheatreHallApiTest(TestCase):
 
     def test_auth_required(self):
         response = self.client.get(THEATRE_HALL_URL)
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedTheatreHallApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="test@test.test",
-            password="testpassword2321"
+            email="test@test.test", password="testpassword2321"
         )
         self.client.force_authenticate(self.user)
 
@@ -90,5 +86,5 @@ class AdminTheatreHallApiTest(APITestCase):
         )
         self.assertEqual(
             theatre_hall.capacity,
-            theatre_hall_payload["rows"] * theatre_hall_payload["seats_in_row"]
+            theatre_hall_payload["rows"] * theatre_hall_payload["seats_in_row"],
         )

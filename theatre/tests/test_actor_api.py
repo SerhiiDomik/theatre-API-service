@@ -16,18 +16,14 @@ class UnauthenticatedActorApiTest(TestCase):
 
     def test_auth_required(self):
         response = self.client.get(ACTOR_URL)
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedActorApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="test@test.test",
-            password="testpassword23"
+            email="test@test.test", password="testpassword23"
         )
         self.client.force_authenticate(self.user)
 
@@ -76,6 +72,6 @@ class AdminActorApiTest(APITestCase):
         self.assertEqual(actor.first_name, actor_payload["first_name"])
         self.assertEqual(actor.last_name, actor_payload["last_name"])
         self.assertEqual(
-            actor.full_name, f"{actor_payload['first_name']} "
-                             f"{actor_payload['last_name']}"
+            actor.full_name,
+            f"{actor_payload['first_name']} " f"{actor_payload['last_name']}",
         )

@@ -32,18 +32,14 @@ class UnauthenticatedPlayApiTest(TestCase):
 
     def test_auth_required(self):
         response = self.client.get(PLAY_URL)
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedPlayApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="testemail@test.test",
-            password="testpassword123"
+            email="testemail@test.test", password="testpassword123"
         )
         self.client.force_authenticate(self.user)
 
@@ -56,12 +52,8 @@ class AuthenticatedPlayApiTest(TestCase):
             last_name="TestLastName",
         )
 
-        self.genre1 = Genre.objects.create(
-            name="Genre11t12t"
-        )
-        self.genre2 = Genre.objects.create(
-            name="TestGenre4214"
-        )
+        self.genre1 = Genre.objects.create(name="Genre11t12t")
+        self.genre2 = Genre.objects.create(name="TestGenre4214")
 
     @staticmethod
     def serialize_list_play(play: Play) -> dict:
@@ -87,8 +79,11 @@ class AuthenticatedPlayApiTest(TestCase):
 
         response = self.client.get(PLAY_URL, {"title": "Inception"})
 
-        self.assertIn(PlayListSerializer(play_with_title_1).data, response.data["results"])
-        self.assertNotIn(PlayListSerializer(play_with_title_2).data, response.data["results"])
+        serializer1 = PlayListSerializer(play_with_title_1)
+        serializer2 = PlayListSerializer(play_with_title_2)
+
+        self.assertIn(serializer1.data, response.data["results"])
+        self.assertNotIn(serializer2.data, response.data["results"])
 
     def test_filter_plays_by_genre(self):
         play_without_genre = sample_play()
@@ -100,13 +95,18 @@ class AuthenticatedPlayApiTest(TestCase):
         play_with_genre_2.genres.add(self.genre2)
 
         response = self.client.get(
-            PLAY_URL,
-            {"genres": f"{self.genre1.id},{self.genre2.id}"}
+            PLAY_URL, {"genres": f"{self.genre1.id},{self.genre2.id}"}
         )
 
-        self.assertIn(self.serialize_list_play(play_with_genre_1), response.data["results"])
-        self.assertIn(self.serialize_list_play(play_with_genre_2), response.data["results"])
-        self.assertNotIn(self.serialize_list_play(play_without_genre), response.data["results"])
+        self.assertIn(
+            self.serialize_list_play(play_with_genre_1), response.data["results"]
+        )
+        self.assertIn(
+            self.serialize_list_play(play_with_genre_2), response.data["results"]
+        )
+        self.assertNotIn(
+            self.serialize_list_play(play_without_genre), response.data["results"]
+        )
 
     def test_filter_plays_by_actor(self):
         play_without_actors = sample_play()
@@ -118,13 +118,18 @@ class AuthenticatedPlayApiTest(TestCase):
         play_with_actor_2.actors.add(self.actor2)
 
         response = self.client.get(
-            PLAY_URL,
-            {"actors": f"{self.actor1.id},{self.actor2.id}"}
+            PLAY_URL, {"actors": f"{self.actor1.id},{self.actor2.id}"}
         )
 
-        self.assertIn(self.serialize_list_play(play_with_actor_1), response.data["results"])
-        self.assertIn(self.serialize_list_play(play_with_actor_2), response.data["results"])
-        self.assertNotIn(self.serialize_list_play(play_without_actors), response.data["results"])
+        self.assertIn(
+            self.serialize_list_play(play_with_actor_1), response.data["results"]
+        )
+        self.assertIn(
+            self.serialize_list_play(play_with_actor_2), response.data["results"]
+        )
+        self.assertNotIn(
+            self.serialize_list_play(play_without_actors), response.data["results"]
+        )
 
     def test_retrieve_play_detail(self):
         play = sample_play()
@@ -170,12 +175,8 @@ class AdminPlayTest(APITestCase):
             last_name="TestLastName",
         )
 
-        self.genre1 = Genre.objects.create(
-            name="Genre11t12t"
-        )
-        self.genre2 = Genre.objects.create(
-            name="TestGenre4214"
-        )
+        self.genre1 = Genre.objects.create(name="Genre11t12t")
+        self.genre2 = Genre.objects.create(name="TestGenre4214")
 
     def test_create_play(self):
         play_payload = {
@@ -184,8 +185,6 @@ class AdminPlayTest(APITestCase):
         }
 
         response = self.client.post(PLAY_URL, play_payload)
-        print("response.data")
-        print(response.data)
         play = Play.objects.get(id=response.data["id"])
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)

@@ -17,18 +17,14 @@ class UnauthenticatedGenreApiTest(TestCase):
 
     def test_auth_required(self):
         response = self.client.get(GENRE_URL)
-        self.assertEqual(
-            response.status_code,
-            status.HTTP_401_UNAUTHORIZED
-        )
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class AuthenticatedGenreApiTest(TestCase):
     def setUp(self):
         self.client = APIClient()
         self.user = get_user_model().objects.create_user(
-            email="testemail@test.test",
-            password="testpassword123"
+            email="testemail@test.test", password="testpassword123"
         )
         self.client.force_authenticate(self.user)
 

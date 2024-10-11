@@ -32,7 +32,7 @@ class TheatreHallSerializer(serializers.ModelSerializer):
 
 
 class PlaySerializer(serializers.ModelSerializer):
-    image = serializers.ImageField(required=True)
+    image = serializers.ImageField(required=False)
 
     class Meta:
         model = Play
@@ -81,7 +81,7 @@ class PlayDetailSerializer(PlaySerializer):
 class PerformanceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Performance
-        fields = ("id", "show_time", "play", "theatre_hall")  # add image?
+        fields = ("id", "show_time", "play", "theatre_hall")
 
 
 class TicketSerializer(serializers.ModelSerializer):
