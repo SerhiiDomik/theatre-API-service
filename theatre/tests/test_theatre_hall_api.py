@@ -54,7 +54,7 @@ class AuthenticatedTheatreHallApiTest(TestCase):
         serializer = TheatreHallSerializer(theatre_hall, many=True)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["results"], serializer.data)
+        self.assertEqual(response.data, serializer.data)
 
 
 class AdminTheatreHallApiTest(APITestCase):
