@@ -235,5 +235,3 @@ class AdminPerformanceApiTest(TestCase):
         )
 
         self.assertEqual(performance_data["tickets_available"], expected_tickets_available)
-
-

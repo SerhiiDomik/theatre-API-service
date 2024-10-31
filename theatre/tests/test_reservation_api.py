@@ -1,7 +1,4 @@
-import uuid
-
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError
 from django.test import TestCase
 from django.urls import reverse
 from rest_framework import status
@@ -12,34 +9,6 @@ from datetime import datetime
 from django.db.models import F, Count
 
 RESERVATION_URL = reverse("theatre:reservation-list")
-
-
-# def detail_url(performance_id):
-#     return reverse("theatre:performance-detail", args=[performance_id])
-
-
-# def sample_performance(**params):
-#     play = Play.objects.create(
-#         title=f"Sample-{uuid.uuid4()}", description="Sample description"
-#     )
-#     theatre_hall = TheatreHall.objects.create(
-#         name="Sample Hall", rows=10, seats_in_row=15
-#     )
-#
-#     defaults = {
-#         "play": play,
-#         "theatre_hall": theatre_hall,
-#         "show_time": datetime.now(),
-#     }
-#     defaults.update(params)
-#
-#     return Performance.objects.create(**defaults)
-
-
-# def remove_key_from_dict_list(dict_list, key):
-#     for item in dict_list:
-#         if key in item:
-#             del item[key]
 
 
 class UnauthenticatedReservationApiTest(TestCase):
@@ -119,7 +88,8 @@ class AuthenticatedReservationApiTest(TestCase):
             ]
         }
 
-        try:
-            self.client.post(RESERVATION_URL, payload, format="json")
-        except IntegrityError as e:
-            return f"Database IntegrityError encountered: {e}"
+        response = self.client.post(RESERVATION_URL, payload, format="json")
+
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+        self.assertIn("Duplicate tickets are not allowed for the same performance.", response.data["tickets"][0])

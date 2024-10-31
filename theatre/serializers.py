@@ -164,8 +164,9 @@ class ReservationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
-            reservation = Reservation.objects.create(**validated_data)
+            self.validate_tickets(tickets_data)
 
+            reservation = Reservation.objects.create(**validated_data)
             for ticket_data in tickets_data:
                 Ticket.objects.create(reservation=reservation, **ticket_data)
             return reservation
@@ -173,12 +174,25 @@ class ReservationSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         with transaction.atomic():
             tickets_data = validated_data.pop("tickets")
+            self.validate_tickets(tickets_data)
             instance.save()
             instance.tickets.all().delete()
             for ticket_data in tickets_data:
                 Ticket.objects.create(reservation=instance, **ticket_data)
 
             return instance
+
+    @staticmethod
+    def validate_tickets(tickets):
+        seen_tickets = set()
+        for ticket in tickets:
+            ticket_key = (ticket["row"], ticket["seat"], ticket["performance"])
+            if ticket_key in seen_tickets:
+                raise serializers.ValidationError(
+                    "Duplicate tickets are not allowed for the same performance."
+                )
+            seen_tickets.add(ticket_key)
+        return tickets
 
 
 class ReservationListSerializer(ReservationSerializer):
